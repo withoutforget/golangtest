@@ -3,6 +3,7 @@ package transport
 import (
 	"context"
 	"gotest/internal/database"
+	"gotest/internal/repository"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -20,46 +21,41 @@ func NewAPI() *API {
 		panic(err.Error())
 	}
 
-	tx, err := database.NewTransaction(db, nil)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer tx.Commit()
-	defer tx.Close()
-
-	err = database.Migrate(tx)
-	if err != nil {
-		panic(err.Error())
-	}
-
 	return &API{db: db, ctx: ctx}
 }
 
 func (api *API) index_handler(c *fiber.Ctx) error {
-	tr, err := database.NewTransaction(api.db, nil)
+	tx, err := database.NewTransaction(
+		api.db, nil,
+	)
 	if err != nil {
-		return c.JSON(fiber.Map{"error": err.Error()})
+		return c.JSON(fiber.Map{"error1": err.Error()})
 	}
-	defer tr.Close()
-	defer tr.Rollback()
+	defer tx.Close()
 
-	q1 := "CREATE TABLE users (id INT PRIMARY KEY);INSERT INTO users (id) VALUES (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);"
-	tr.Transaction().Query(q1)
+	r := repository.NewLogRepository(tx)
 
-	rows, err := tr.Transaction().Query("SELECT * FROM users;")
+	_, err = r.AddLog(repository.NewLogModel{Raw: c.Query("r"), Level: c.Query("l")})
+
 	if err != nil {
-		return c.JSON(fiber.Map{"error": err.Error()})
+		tx.Rollback()
+		return c.JSON(fiber.Map{"error2": err.Error()})
 	}
-	array := make([]int, 0)
-	for rows.Next() {
-		var tmp int
 
-		if err := rows.Scan(&tmp); err != nil {
-			return c.JSON(fiber.Map{"error": err.Error()})
-		}
-		array = append(array, tmp)
+	data, err := r.GetLogs()
+
+	if err != nil {
+		tx.Rollback()
+		return c.JSON(fiber.Map{"error3": err.Error()})
 	}
-	return c.JSON(fiber.Map{"result": array})
+
+	tx.Commit()
+
+	return c.JSON(
+		fiber.Map{
+			"data": data,
+		})
+
 }
 
 func (s *Server) setupAPI() {

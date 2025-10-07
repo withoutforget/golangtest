@@ -26,7 +26,7 @@ func NewLogRepository(tx database.TransactionManager) *LogRepository {
 
 func (r *LogRepository) AddLog(model NewLogModel) (uint64, error) {
 	rows, err := r.tx.Query(
-		"INSERT INTO log (raw, level) VALUES (?, ?) RETURNING id",
+		"INSERT INTO log (raw, level) VALUES ($1, $2) RETURNING id;",
 		model.Raw,
 		model.Level,
 	)
@@ -43,4 +43,23 @@ func (r *LogRepository) AddLog(model NewLogModel) (uint64, error) {
 	}
 	return tmp, nil
 
+}
+
+func (r *LogRepository) GetLogs() ([]LogModel, error) {
+	rows, err := r.tx.Query("SELECT * FROM log;")
+	if err != nil {
+		return nil, err
+	}
+	res := make([]LogModel, 0)
+	for rows.Next() {
+		var id uint64
+		var raw string
+		var level string
+		err := rows.Scan(&id, &raw, &level)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, LogModel{ID: id, Raw: raw, Level: level})
+	}
+	return res, nil
 }

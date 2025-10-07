@@ -18,12 +18,13 @@ type TransactionManagerImpl struct {
 	connection  *sql.Conn
 	transaction *sql.Tx
 	isValid     bool
+	hascommited bool
 }
 
 func NewTransaction(db *Database, opts *sql.TxOptions) (*TransactionManagerImpl, error) {
 	log := slog.Default()
 
-	ret := &TransactionManagerImpl{}
+	ret := &TransactionManagerImpl{hascommited: false}
 	conn, err := db.GetConnection()
 
 	if err != nil {
@@ -42,7 +43,6 @@ func NewTransaction(db *Database, opts *sql.TxOptions) (*TransactionManagerImpl,
 
 	ret.connection = conn
 	ret.transaction = tx
-	ret.isValid = true
 	return ret, nil
 }
 
