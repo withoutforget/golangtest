@@ -15,9 +15,23 @@ type API struct {
 func NewAPI() *API {
 	ctx := context.Background()
 	db, err := database.NewDatabase(ctx)
+
 	if err != nil {
 		panic(err.Error())
 	}
+
+	tx, err := database.NewTransaction(db, nil)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer tx.Commit()
+	defer tx.Close()
+
+	err = database.Migrate(tx)
+	if err != nil {
+		panic(err.Error())
+	}
+
 	return &API{db: db, ctx: ctx}
 }
 
