@@ -25,7 +25,7 @@ func NewAPI() *API {
 	return &API{db: db, ctx: ctx}
 }
 
-func (api *API) index_handler(c *fiber.Ctx) error {
+func (api *API) append_log_handler(c *fiber.Ctx) error {
 	raw := c.Query("raw")
 	level := c.Query("level")
 
@@ -54,7 +54,32 @@ func (api *API) index_handler(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{"id": id})
 }
 
+func (api *API) get_log_handler(c *fiber.Ctx) error {
+	tx, err := database.NewTransaction(api.db, nil)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	defer tx.Close()
+	r := repository.NewLogRepository(tx)
+
+	u := usecase.NewGetLogUsecase(r)
+
+	logs, err := u.Run()
+
+	if err != nil {
+		tx.Rollback()
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	tx.Commit()
+
+	return c.Status(200).JSON(fiber.Map{"logs": logs})
+}
+
 func (s *Server) setupAPI() {
 	api := NewAPI()
-	s.fiber.Get("/", api.index_handler)
+	s.fiber.Get("/append", api.append_log_handler)
+	s.fiber.Get("/get", api.get_log_handler)
+
 }
