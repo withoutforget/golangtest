@@ -4,6 +4,7 @@ import (
 	"context"
 	"gotest/internal/database"
 	"gotest/internal/repository"
+	"gotest/internal/usecase"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,37 +26,32 @@ func NewAPI() *API {
 }
 
 func (api *API) index_handler(c *fiber.Ctx) error {
-	tx, err := database.NewTransaction(
-		api.db, nil,
-	)
+	raw := c.Query("raw")
+	level := c.Query("level")
+
+	if raw == "" || level == "" {
+		return c.Status(400).JSON(fiber.Map{"error": "incorrect input"})
+	}
+	tx, err := database.NewTransaction(api.db, nil)
 	if err != nil {
-		return c.JSON(fiber.Map{"error1": err.Error()})
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	defer tx.Close()
-
 	r := repository.NewLogRepository(tx)
 
-	_, err = r.AddLog(repository.NewLogModel{Raw: c.Query("r"), Level: c.Query("l")})
+	u := usecase.NewLogUsecase(r)
+
+	id, err := u.Run(raw, level)
 
 	if err != nil {
 		tx.Rollback()
-		return c.JSON(fiber.Map{"error2": err.Error()})
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
 	}
-
-	data, err := r.GetLogs()
-
-	if err != nil {
-		tx.Rollback()
-		return c.JSON(fiber.Map{"error3": err.Error()})
-	}
-
 	tx.Commit()
 
-	return c.JSON(
-		fiber.Map{
-			"data": data,
-		})
-
+	return c.Status(200).JSON(fiber.Map{"id": id})
 }
 
 func (s *Server) setupAPI() {
