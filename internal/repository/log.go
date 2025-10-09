@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"gotest/internal/database"
 	"time"
 
@@ -73,8 +74,17 @@ func (r *LogRepository) GetLogs(
 	level []string,
 	source *string,
 	request_id *string,
-	logger_name *string) ([]LogModel, error) {
-	rows, err := r.tx.Query(`SELECT 
+	logger_name *string,
+	group_asc bool) ([]LogModel, error) {
+
+	var order string
+	if group_asc {
+		order = "ASC"
+	} else {
+		order = "DESC"
+	}
+
+	query_str := fmt.Sprintf(`SELECT 
 	id, 
 	raw, 
 	level, 
@@ -89,8 +99,13 @@ func (r *LogRepository) GetLogs(
 		AND ($4::TEXT IS NULL OR source = $4)
 		AND ($5::TEXT IS NULL OR request_id = $5)
 		AND ($6::TEXT IS NULL OR logger_name = $6)
+	ORDER BY created_at %v
 	;
 	`,
+		order,
+	)
+
+	rows, err := r.tx.Query(query_str,
 		since,
 		before,
 		pq.Array(level),

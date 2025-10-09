@@ -22,12 +22,14 @@ func (u *GetLogUsecase) Run(since *time.Time,
 	level []string,
 	source *string,
 	request_id *string,
-	logger_name *string) (GetLogUsecaseResponse, error) {
+	logger_name *string,
+	group_asc bool) (GetLogUsecaseResponse, error) {
 	logs, err := u.log_repo.GetLogs(since,
 		before,
 		level,
 		source,
 		request_id,
-		logger_name)
+		logger_name,
+		group_asc)
 	return GetLogUsecaseResponse{Logs: logs}, err
 }

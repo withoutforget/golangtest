@@ -65,6 +65,7 @@ func (api *API) get_log_handler(c *fiber.Ctx) error {
 	var source *string
 	var request_id *string
 	var logger_name *string
+	var order bool
 
 	sinceq := c.Query("since")
 	beforeq := c.Query("before")
@@ -72,6 +73,13 @@ func (api *API) get_log_handler(c *fiber.Ctx) error {
 	sourceq := c.Query("source")
 	request_idq := c.Query("request_id")
 	logger_nameq := c.Query("logger_name")
+	orderq := c.Query("order")
+
+	if orderq == "" || orderq == "ASC" {
+		order = true
+	} else {
+		order = false
+	}
 
 	if sinceq != "" {
 		v, err := strconv.ParseInt(sinceq, 10, 64)
@@ -114,6 +122,7 @@ func (api *API) get_log_handler(c *fiber.Ctx) error {
 			source,
 			request_id,
 			logger_name,
+			order,
 		)
 	})
 }
