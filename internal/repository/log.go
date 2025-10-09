@@ -3,10 +3,10 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"gotest/internal/database"
 	"time"
 
 	"github.com/lib/pq"
+	"gotest/internal/database"
 )
 
 type LogModel struct {
@@ -37,7 +37,6 @@ func NewLogRepository(tx database.TransactionManager) *LogRepository {
 }
 
 func (r *LogRepository) AddLog(model NewLogModel) (uint64, error) {
-
 	rows, err := r.tx.Query(
 		`INSERT INTO log
 		 (raw, level,
@@ -53,7 +52,6 @@ func (r *LogRepository) AddLog(model NewLogModel) (uint64, error) {
 		model.RequestID,
 		model.LoggerName,
 	)
-
 	if err != nil {
 		return 0, err
 	}
@@ -65,7 +63,6 @@ func (r *LogRepository) AddLog(model NewLogModel) (uint64, error) {
 		}
 	}
 	return tmp, nil
-
 }
 
 func (r *LogRepository) GetLogs(
@@ -75,8 +72,8 @@ func (r *LogRepository) GetLogs(
 	source *string,
 	request_id *string,
 	logger_name *string,
-	group_asc bool) ([]LogModel, error) {
-
+	group_asc bool,
+) ([]LogModel, error) {
 	var order string
 	if group_asc {
 		order = "ASC"
@@ -129,13 +126,15 @@ func (r *LogRepository) GetLogs(
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, LogModel{ID: id,
+		res = append(res, LogModel{
+			ID:         id,
 			Raw:        raw,
 			Level:      level,
 			CreatedAt:  created_at,
 			Source:     source,
 			RequestID:  request_id,
-			LoggerName: logger_name})
+			LoggerName: logger_name,
+		})
 	}
 	return res, nil
 }

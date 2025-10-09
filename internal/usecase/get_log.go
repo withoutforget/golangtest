@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	"gotest/internal/repository"
 	"time"
+
+	"gotest/internal/repository"
 )
 
 type GetLogUsecase struct {
@@ -23,7 +24,8 @@ func (u *GetLogUsecase) Run(since *time.Time,
 	source *string,
 	request_id *string,
 	logger_name *string,
-	group_asc bool) (GetLogUsecaseResponse, error) {
+	group_asc bool,
+) (GetLogUsecaseResponse, error) {
 	logs, err := u.log_repo.GetLogs(since,
 		before,
 		level,

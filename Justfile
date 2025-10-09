@@ -1,4 +1,4 @@
 run:
     go run cmd/app/main.go
 fmt:
-    go fmt ./...
+    golangci-lint fmt

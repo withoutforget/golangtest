@@ -7,8 +7,8 @@ import (
 
 type TransactionManager interface {
 	IsValid() bool
-	Commit() error
-	Rollback() error
+	Commit()
+	Rollback()
 	Close()
 	Connection() *sql.Conn
 	Transaction() *sql.Tx
@@ -26,7 +26,6 @@ func NewTransaction(db *Database, opts *sql.TxOptions) (*TransactionManagerImpl,
 
 	ret := &TransactionManagerImpl{hascommited: false}
 	conn, err := db.GetConnection()
-
 	if err != nil {
 		log.Error("Cannot create connection", slog.String("error", err.Error()))
 		return nil, err
@@ -50,12 +49,18 @@ func (t *TransactionManagerImpl) IsValid() bool {
 	return t.isValid
 }
 
-func (t *TransactionManagerImpl) Commit() error {
-	return t.transaction.Commit()
+func (t *TransactionManagerImpl) Commit() {
+	err := t.transaction.Commit()
+	if err != nil {
+		slog.Default().Error("cannot commit", slog.String("error", err.Error()))
+	}
 }
 
-func (t *TransactionManagerImpl) Rollback() error {
-	return t.transaction.Rollback()
+func (t *TransactionManagerImpl) Rollback() {
+	err := t.transaction.Rollback()
+	if err != nil {
+		slog.Default().Error("cannot rollback", slog.String("error", err.Error()))
+	}
 }
 
 func (t *TransactionManagerImpl) Close() {

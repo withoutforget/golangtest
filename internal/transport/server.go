@@ -3,9 +3,8 @@ package transport
 import (
 	"log/slog"
 
-	"github.com/gofiber/fiber/v2/middleware/logger"
-
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 type Server struct {
@@ -14,7 +13,8 @@ type Server struct {
 }
 
 func NewServer(fiber *fiber.App,
-	log *slog.Logger) *Server {
+	log *slog.Logger,
+) *Server {
 	return &Server{fiber: fiber, log: log}
 }
 
@@ -26,7 +26,6 @@ func (s *Server) Run() {
 	err := s.fiber.Listen(
 		"localhost:80",
 	)
-
 	if err != nil {
 		s.log.Error("Error during listen", slog.String("error", err.Error()))
 		return

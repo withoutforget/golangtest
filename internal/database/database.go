@@ -33,7 +33,15 @@ func getDatabase() (*sql.DB, error) {
 	host := "localhost"
 	port := "5432"
 	database_name := "postgres"
-	dsn := fmt.Sprintf("%v://%v:%v@%v:%v/%v?sslmode=disable", driver, username, password, host, port, database_name)
+	dsn := fmt.Sprintf(
+		"%v://%v:%v@%v:%v/%v?sslmode=disable",
+		driver,
+		username,
+		password,
+		host,
+		port,
+		database_name,
+	)
 	con, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err

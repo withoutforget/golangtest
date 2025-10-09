@@ -2,13 +2,13 @@ package transport
 
 import (
 	"context"
-	"gotest/internal/database"
-	"gotest/internal/repository"
-	"gotest/internal/usecase"
 	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"gotest/internal/database"
+	"gotest/internal/repository"
+	"gotest/internal/usecase"
 )
 
 type API struct {
@@ -19,7 +19,6 @@ type API struct {
 func NewAPI() *API {
 	ctx := context.Background()
 	db, err := database.NewDatabase(ctx)
-
 	if err != nil {
 		panic(err.Error())
 	}
@@ -131,5 +130,4 @@ func (s *Server) setupAPI() {
 	api := NewAPI()
 	s.fiber.Get("/append", api.append_log_handler)
 	s.fiber.Get("/get", api.get_log_handler)
-
 }

@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"gotest/internal/logging"
-	"gotest/internal/transport"
 	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
+	"gotest/internal/logging"
+	"gotest/internal/transport"
 )
 
 func main() {
