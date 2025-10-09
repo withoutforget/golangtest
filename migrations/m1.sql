@@ -1,5 +1,9 @@
 CREATE TABLE log (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    raw TEXT,
-    level VARCHAR(50)
+    id BIGSERIAL PRIMARY KEY,
+    raw TEXT NOT NULL,
+    level VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    source VARCHAR(128),
+    request_id VARCHAR(64),
+    logger_name VARCHAR(255)
 );

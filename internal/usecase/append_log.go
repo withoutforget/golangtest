@@ -14,7 +14,9 @@ type AppendLogUsecaseResponse struct {
 	ID uint64 `json:"id"`
 }
 
-func (u *AppendLogUsecase) Run(raw string, level string) (AppendLogUsecaseResponse, error) {
-	id, err := u.log_repo.AddLog(repository.NewLogModel{Raw: raw, Level: level})
+func (u *AppendLogUsecase) Run(
+	model repository.NewLogModel,
+) (AppendLogUsecaseResponse, error) {
+	id, err := u.log_repo.AddLog(model)
 	return AppendLogUsecaseResponse{ID: id}, err
 }
