@@ -29,52 +29,22 @@ func (api *API) append_log_handler(c *fiber.Ctx) error {
 	raw := c.Query("raw")
 	level := c.Query("level")
 
-	if raw == "" || level == "" {
-		return c.Status(400).JSON(fiber.Map{"error": "incorrect input"})
+	isParamsValid, ret := validateParam(c, raw, level)
+	if !isParamsValid {
+		return ret
 	}
-	tx, err := database.NewTransaction(api.db, nil)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-	}
-	defer tx.Close()
-	r := repository.NewLogRepository(tx)
 
-	u := usecase.NewLogUsecase(r)
-
-	id, err := u.Run(raw, level)
-
-	if err != nil {
-		tx.Rollback()
-		return c.Status(500).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-	tx.Commit()
-
-	return c.Status(200).JSON(fiber.Map{"id": id})
+	return withTx(c, api.db, func(tx database.TransactionManager) (any, error) {
+		r := repository.NewLogRepository(tx)
+		return usecase.NewAppendLogUsecase(r).Run(raw, level)
+	})
 }
 
 func (api *API) get_log_handler(c *fiber.Ctx) error {
-	tx, err := database.NewTransaction(api.db, nil)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-	}
-	defer tx.Close()
-	r := repository.NewLogRepository(tx)
-
-	u := usecase.NewGetLogUsecase(r)
-
-	logs, err := u.Run()
-
-	if err != nil {
-		tx.Rollback()
-		return c.Status(500).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-	tx.Commit()
-
-	return c.Status(200).JSON(fiber.Map{"logs": logs})
+	return withTx(c, api.db, func(tx database.TransactionManager) (any, error) {
+		r := repository.NewLogRepository(tx)
+		return usecase.NewGetLogUsecase(r).Run()
+	})
 }
 
 func (s *Server) setupAPI() {
