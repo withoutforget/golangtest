@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"gotest/internal/database"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type LogModel struct {
@@ -65,11 +67,40 @@ func (r *LogRepository) AddLog(model NewLogModel) (uint64, error) {
 
 }
 
-func (r *LogRepository) GetLogs() ([]LogModel, error) {
-	rows, err := r.tx.Query("SELECT * FROM log;")
+func (r *LogRepository) GetLogs(
+	since *time.Time,
+	before *time.Time,
+	level []string,
+	source *string,
+	request_id *string,
+	logger_name *string) ([]LogModel, error) {
+	rows, err := r.tx.Query(`SELECT 
+	id, 
+	raw, 
+	level, 
+	created_at, 
+	source,
+	request_id, 
+	logger_name 
+	FROM log WHERE 
+		($1::timestamptz IS NULL OR created_at >= $1)
+		AND ($2::timestamptz IS NULL OR created_at <= $2)
+		AND ($3::TEXT[] IS NULL OR level = ANY($3))
+		AND ($4::TEXT IS NULL OR source = $4)
+		AND ($5::TEXT IS NULL OR request_id = $5)
+		AND ($6::TEXT IS NULL OR logger_name = $6)
+	;
+	`,
+		since,
+		before,
+		pq.Array(level),
+		source,
+		request_id,
+		logger_name)
 	if err != nil {
 		return nil, err
 	}
+
 	res := make([]LogModel, 0)
 	for rows.Next() {
 		var id uint64

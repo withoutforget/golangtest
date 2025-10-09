@@ -1,6 +1,9 @@
 package usecase
 
-import "gotest/internal/repository"
+import (
+	"gotest/internal/repository"
+	"time"
+)
 
 type GetLogUsecase struct {
 	log_repo *repository.LogRepository
@@ -14,7 +17,17 @@ type GetLogUsecaseResponse struct {
 	Logs []repository.LogModel `json:"logs"`
 }
 
-func (u *GetLogUsecase) Run() ([]repository.LogModel, error) {
-	logs, err := u.log_repo.GetLogs()
-	return logs, err
+func (u *GetLogUsecase) Run(since *time.Time,
+	before *time.Time,
+	level []string,
+	source *string,
+	request_id *string,
+	logger_name *string) (GetLogUsecaseResponse, error) {
+	logs, err := u.log_repo.GetLogs(since,
+		before,
+		level,
+		source,
+		request_id,
+		logger_name)
+	return GetLogUsecaseResponse{Logs: logs}, err
 }
