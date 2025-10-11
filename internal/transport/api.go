@@ -2,6 +2,8 @@ package transport
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"strconv"
 	"time"
@@ -59,7 +61,18 @@ func (api *API) append_log_handler(c *fiber.Ctx) error {
 	})
 }
 
+type GetLogHandlerRequest struct {
+	Since       *time.Time `json:"since"`
+	Before      *time.Time `json:"before"`
+	Level       []string   `json:"level"`
+	Source      *string    `json:"source"`
+	RequesID    *string    `json:"request_id"`
+	Logger_name *string    `json:"logger_name"`
+	Order       bool       `json:"order"`
+}
+
 func (api *API) get_log_handler(c *fiber.Ctx) error {
+
 	var since *time.Time
 	var before *time.Time
 	var level []string
@@ -113,6 +126,23 @@ func (api *API) get_log_handler(c *fiber.Ctx) error {
 	if logger_nameq != "" {
 		logger_name = &logger_nameq
 	}
+
+	data, err := json.Marshal(GetLogHandlerRequest{since,
+		before,
+		level,
+		source,
+		request_id,
+		logger_name,
+		order})
+
+	if err != nil {
+		panic("abc")
+	}
+
+	hasher := sha256.New()
+	hasher.Write(data)
+	res := hasher.Sum(nil)
+	_ = base64.URLEncoding.EncodeToString(res)
 
 	return withTx(c, api.db, func(tx database.TransactionManager) (any, error) {
 		r := repository.NewLogRepository(tx)

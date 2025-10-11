@@ -1,5 +1,5 @@
 run:
-    go run cmd/app/main.go
+    go run -mod=vendor cmd/app/main.go
 fmt:
     golangci-lint fmt
 docs:
