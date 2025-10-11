@@ -2,13 +2,15 @@ package transport
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"gotest/internal/database"
 	"gotest/internal/repository"
 	"gotest/internal/usecase"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type API struct {
@@ -26,20 +28,20 @@ func NewAPI() *API {
 	return &API{db: db, ctx: ctx}
 }
 
+type AppendLogRequest struct {
+	Raw        string    `json:"raw"`
+	Level      string    `json:"level"`
+	CreatedAt  time.Time `json:"created_at"`
+	Source     *string   `json:"source"`
+	RequestID  *string   `json:"request_id"`
+	LoggerName *string   `json:"logger_name"`
+}
+
 func (api *API) append_log_handler(c *fiber.Ctx) error {
-	raw := c.Query("raw")
-	level := c.Query("level")
-	created_at := c.Query("created_at")
-	source := c.Query("source")
-	request_id := c.Query("request_id")
-	logger_name := c.Query("logger_name")
+	var request AppendLogRequest
+	request_raw := c.Body()
+	err := json.Unmarshal(request_raw, &request)
 
-	isParamsValid, ret := validateParam(c, raw, level, created_at)
-	if !isParamsValid {
-		return ret
-	}
-
-	created_at_timestamp, err := strconv.ParseInt(created_at, 10, 64)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -47,12 +49,12 @@ func (api *API) append_log_handler(c *fiber.Ctx) error {
 	return withTx(c, api.db, func(tx database.TransactionManager) (any, error) {
 		r := repository.NewLogRepository(tx)
 		return usecase.NewAppendLogUsecase(r).Run(repository.NewLogModel{
-			Raw:        raw,
-			Level:      level,
-			CreatedAt:  time.Unix(created_at_timestamp, 0),
-			Source:     source,
-			RequestID:  request_id,
-			LoggerName: logger_name,
+			Raw:        request.Raw,
+			Level:      request.Level,
+			CreatedAt:  request.CreatedAt,
+			Source:     request.Source,
+			RequestID:  request.RequestID,
+			LoggerName: request.LoggerName,
 		})
 	})
 }
@@ -128,6 +130,6 @@ func (api *API) get_log_handler(c *fiber.Ctx) error {
 
 func (s *Server) setupAPI() {
 	api := NewAPI()
-	s.fiber.Get("/append", api.append_log_handler)
+	s.fiber.Post("/append", api.append_log_handler)
 	s.fiber.Get("/get", api.get_log_handler)
 }

@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lib/pq"
 	"gotest/internal/database"
+
+	"github.com/lib/pq"
 )
 
 type LogModel struct {
@@ -14,18 +15,18 @@ type LogModel struct {
 	Raw        string    `json:"raw"`
 	Level      string    `json:"level"`
 	CreatedAt  time.Time `json:"created_at"`
-	Source     string    `json:"source"`
-	RequestID  string    `json:"request_id"`
-	LoggerName string    `json:"logger_name"`
+	Source     *string   `json:"source"`
+	RequestID  *string   `json:"request_id"`
+	LoggerName *string   `json:"logger_name"`
 }
 
 type NewLogModel struct {
 	Raw        string    `json:"raw"`
 	Level      string    `json:"level"`
 	CreatedAt  time.Time `json:"created_at"`
-	Source     string    `json:"source"`
-	RequestID  string    `json:"request_id"`
-	LoggerName string    `json:"logger_name"`
+	Source     *string   `json:"source"`
+	RequestID  *string   `json:"request_id"`
+	LoggerName *string   `json:"logger_name"`
 }
 
 type LogRepository struct {
@@ -119,9 +120,9 @@ func (r *LogRepository) GetLogs(
 		var raw string
 		var level string
 		var created_at time.Time
-		var source string
-		var request_id string
-		var logger_name string
+		var source *string
+		var request_id *string
+		var logger_name *string
 		err := rows.Scan(&id, &raw, &level, &created_at, &source, &request_id, &logger_name)
 		if err != nil {
 			return nil, err

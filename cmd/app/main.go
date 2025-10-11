@@ -4,9 +4,10 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/gofiber/fiber/v2"
 	"gotest/internal/logging"
 	"gotest/internal/transport"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {

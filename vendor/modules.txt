@@ -2,8 +2,6 @@
 ## explicit; go 1.13
 github.com/andybalholm/brotli
 github.com/andybalholm/brotli/matchfinder
-# github.com/gofiber/fiber v1.14.6
-## explicit; go 1.11
 # github.com/gofiber/fiber/v2 v2.52.9
 ## explicit; go 1.20
 github.com/gofiber/fiber/v2
@@ -11,13 +9,9 @@ github.com/gofiber/fiber/v2/internal/schema
 github.com/gofiber/fiber/v2/log
 github.com/gofiber/fiber/v2/middleware/logger
 github.com/gofiber/fiber/v2/utils
-# github.com/gofiber/utils v0.0.10
-## explicit; go 1.11
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid
-# github.com/gorilla/schema v1.1.0
-## explicit
 # github.com/klauspost/compress v1.17.9
 ## explicit; go 1.20
 github.com/klauspost/compress/flate
@@ -55,7 +49,7 @@ github.com/valyala/fasthttp/stackless
 # github.com/valyala/tcplisten v1.0.0
 ## explicit; go 1.12
 github.com/valyala/tcplisten
-# golang.org/x/sys v0.28.0
+# golang.org/x/sys v0.29.0
 ## explicit; go 1.18
 golang.org/x/sys/unix
 golang.org/x/sys/windows

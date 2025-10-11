@@ -3,8 +3,9 @@ package transport
 import (
 	"log/slog"
 
-	"github.com/gofiber/fiber/v2"
 	"gotest/internal/database"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func withTx(

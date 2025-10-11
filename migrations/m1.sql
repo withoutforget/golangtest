@@ -3,7 +3,7 @@ CREATE TABLE log (
     raw TEXT NOT NULL,
     level VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    source VARCHAR(128),
-    request_id VARCHAR(64),
-    logger_name VARCHAR(255)
+    source VARCHAR(128) NULL,
+    request_id VARCHAR(64) NULL,
+    logger_name VARCHAR(255) NULL
 );
